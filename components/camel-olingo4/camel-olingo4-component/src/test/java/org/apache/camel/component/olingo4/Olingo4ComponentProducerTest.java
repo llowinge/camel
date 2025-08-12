@@ -16,6 +16,7 @@
  */
 package org.apache.camel.component.olingo4;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,10 +58,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test class for {@link org.apache.camel.component.olingo4.api.Olingo4App} APIs.
- * <p>
- * The integration test runs against using the sample OData 4.0 remote TripPin service published on
- * http://services.odata.org/TripPinRESTierService.
- * </p>
  */
 public class Olingo4ComponentProducerTest extends AbstractOlingo4TestSupport {
 
@@ -235,43 +232,49 @@ public class Olingo4ComponentProducerTest extends AbstractOlingo4TestSupport {
     }
 
     @Test
-    public void testBatch() {
+    public void testBatch() throws IOException {
         final List<Olingo4BatchRequest> batchParts = new ArrayList<>();
-
+        String resourceUri = ODATA_API_BASE_URL;
         // 1. Edm query
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(Constants.METADATA).resourceUri(TEST_SERVICE_BASE_URL).build());
+        batchParts.add(Olingo4BatchQueryRequest.resourcePath(Constants.METADATA).resourceUri(resourceUri)
+                .headers(Map.of("Content-Disposition", "test")).headers(Map.of("Content-Disposition", "test")).build());
 
         // 2. Read entities
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
+        batchParts.add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(resourceUri)
+                .headers(Map.of("Content-Disposition", "test")).build());
 
         // 3. Read entity
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
+        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_PEOPLE).resourceUri(resourceUri)
+                .headers(Map.of("Content-Disposition", "test")).build());
 
         // 4. Read with $top
         final HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put(SystemQueryOptionKind.TOP.toString(), "5");
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).queryParams(queryParams)
-                .build());
+        batchParts
+                .add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(resourceUri)
+                        .headers(Map.of("Content-Disposition", "test")).queryParams(queryParams)
+                        .build());
 
         // 5. Create entity
         ClientEntity clientEntity = createEntity();
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
+        batchParts.add(Olingo4BatchChangeRequest.resourcePath(PEOPLE).resourceUri(resourceUri)
                 .contentId(TEST_CREATE_RESOURCE_CONTENT_ID).operation(Operation.CREATE)
                 .body(clientEntity).build());
 
         // 6. Update middle name in created entry
         clientEntity.getProperties()
                 .add(objFactory.newPrimitiveProperty("MiddleName", objFactory.newPrimitiveValueBuilder().buildString("Lewis")));
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
+        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(resourceUri)
                 .contentId(TEST_UPDATE_RESOURCE_CONTENT_ID)
                 .operation(Operation.UPDATE).body(clientEntity).build());
 
         // 7. Delete entity
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
+        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(resourceUri)
                 .operation(Operation.DELETE).build());
 
         // 8. Read deleted entity to verify delete
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
+        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(resourceUri)
+                .headers(Map.of("Content-Disposition", "test")).build());
 
         // execute batch request
         final List<Olingo4BatchResponse> responseParts = requestBody("direct:batch", batchParts);
