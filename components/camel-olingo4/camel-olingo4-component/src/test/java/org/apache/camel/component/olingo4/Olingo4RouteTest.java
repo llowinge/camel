@@ -16,24 +16,41 @@
  */
 package org.apache.camel.component.olingo4;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.tomakehurst.wiremock.recording.RecordingStatus;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class Olingo4RouteTest extends CamelTestSupport {
-    protected static final String TEST_SERVICE_BASE_URL = "http://services.odata.org/TripPinRESTierService";
+public class Olingo4RouteTest extends AbstractOlingo4WireMockTestSupport {
 
     @SuppressWarnings("unchecked")
     protected <T> T requestBody(String endpoint, Object body, Map<String, Object> headers) throws CamelExecutionException {
         return (T) template().requestBodyAndHeaders(endpoint, body, headers);
+    }
+
+    @BeforeAll
+    public static void refresh() throws IOException {
+        refreshSession();
+    }
+
+    @AfterAll
+    public static void stopWireMockServer() {
+        if (useMockedBackend()) {
+            if (wireMockServer.getRecordingStatus().getStatus().equals(RecordingStatus.Recording)) {
+                wireMockServer.stopRecording();
+            }
+            wireMockServer.stop();
+        }
     }
 
     @Test
@@ -58,8 +75,9 @@ public class Olingo4RouteTest extends CamelTestSupport {
     @Override
     protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() {
-                from("direct:readentities").to("olingo4://read/People?serviceUri=" + TEST_SERVICE_BASE_URL);
+            public void configure() throws IOException {
+                from("direct:readentities")
+                        .to("olingo4://read/People?serviceUri=" + getResolvedTestServiceBaseUrl());
             }
         };
     }

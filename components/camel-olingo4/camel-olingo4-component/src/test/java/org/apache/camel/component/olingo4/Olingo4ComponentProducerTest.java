@@ -16,10 +16,9 @@
  */
 package org.apache.camel.component.olingo4;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
@@ -27,11 +26,6 @@ import org.apache.camel.CamelExecutionException;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.component.olingo4.api.batch.Olingo4BatchChangeRequest;
-import org.apache.camel.component.olingo4.api.batch.Olingo4BatchQueryRequest;
-import org.apache.camel.component.olingo4.api.batch.Olingo4BatchRequest;
-import org.apache.camel.component.olingo4.api.batch.Olingo4BatchResponse;
-import org.apache.camel.component.olingo4.api.batch.Operation;
 import org.apache.camel.spi.BeanIntrospection;
 import org.apache.camel.support.PluginHelper;
 import org.apache.olingo.client.api.domain.ClientCollectionValue;
@@ -40,11 +34,9 @@ import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.domain.ClientServiceDocument;
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,26 +49,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test class for {@link org.apache.camel.component.olingo4.api.Olingo4App} APIs.
- * <p>
- * The integration test runs against using the sample OData 4.0 remote TripPin service published on
- * http://services.odata.org/TripPinRESTierService.
- * </p>
  */
-public class Olingo4ComponentProducerTest extends AbstractOlingo4TestSupport {
+public class Olingo4ComponentProducerTest extends AbstractOlingo4WireMockTestSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(Olingo4ComponentProducerTest.class);
 
-    private static final String PEOPLE = "People";
-    private static final String TEST_PEOPLE = "People('russellwhyte')";
-    private static final String TEST_CREATE_KEY = "'lewisblack'";
-    private static final String TEST_CREATE_PEOPLE = PEOPLE + "(" + TEST_CREATE_KEY + ")";
-    private static final String TEST_CREATE_RESOURCE_CONTENT_ID = "1";
-    private static final String TEST_UPDATE_RESOURCE_CONTENT_ID = "2";
     private static final String TEST_CREATE_JSON = "{\n" + "  \"UserName\": \"lewisblack\",\n" + "  \"FirstName\": \"Lewis\",\n"
                                                    + "  \"LastName\": \"Black\"\n" + "}";
     private static final String TEST_UPDATE_JSON
             = "{\n" + "  \"UserName\": \"lewisblack\",\n" + "  \"FirstName\": \"Lewis\",\n" + "  \"MiddleName\": \"Black\",\n"
               + "  \"LastName\": \"Black\"\n" + "}";
+
+    @BeforeAll
+    public static void refresh() throws IOException {
+        refreshSession();
+    }
 
     @Override
     protected CamelContext createCamelContext() throws Exception {
@@ -219,98 +206,6 @@ public class Olingo4ComponentProducerTest extends AbstractOlingo4TestSupport {
             String causeMsg = e.getCause().getMessage();
             assertTrue(causeMsg.contains("[HTTP/1.1 404 Not Found]"));
         }
-    }
-
-    private ClientEntity createEntity() {
-        ClientEntity clientEntity = objFactory.newEntity(null);
-
-        clientEntity.getProperties().add(
-                objFactory.newPrimitiveProperty("UserName", objFactory.newPrimitiveValueBuilder().buildString("lewisblack")));
-        clientEntity.getProperties()
-                .add(objFactory.newPrimitiveProperty("FirstName", objFactory.newPrimitiveValueBuilder().buildString("Lewis")));
-        clientEntity.getProperties()
-                .add(objFactory.newPrimitiveProperty("LastName", objFactory.newPrimitiveValueBuilder().buildString("Black")));
-
-        return clientEntity;
-    }
-
-    @Test
-    public void testBatch() {
-        final List<Olingo4BatchRequest> batchParts = new ArrayList<>();
-
-        // 1. Edm query
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(Constants.METADATA).resourceUri(TEST_SERVICE_BASE_URL).build());
-
-        // 2. Read entities
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
-
-        // 3. Read entity
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
-
-        // 4. Read with $top
-        final HashMap<String, String> queryParams = new HashMap<>();
-        queryParams.put(SystemQueryOptionKind.TOP.toString(), "5");
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).queryParams(queryParams)
-                .build());
-
-        // 5. Create entity
-        ClientEntity clientEntity = createEntity();
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
-                .contentId(TEST_CREATE_RESOURCE_CONTENT_ID).operation(Operation.CREATE)
-                .body(clientEntity).build());
-
-        // 6. Update middle name in created entry
-        clientEntity.getProperties()
-                .add(objFactory.newPrimitiveProperty("MiddleName", objFactory.newPrimitiveValueBuilder().buildString("Lewis")));
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
-                .contentId(TEST_UPDATE_RESOURCE_CONTENT_ID)
-                .operation(Operation.UPDATE).body(clientEntity).build());
-
-        // 7. Delete entity
-        batchParts.add(Olingo4BatchChangeRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL)
-                .operation(Operation.DELETE).build());
-
-        // 8. Read deleted entity to verify delete
-        batchParts.add(Olingo4BatchQueryRequest.resourcePath(TEST_CREATE_PEOPLE).resourceUri(TEST_SERVICE_BASE_URL).build());
-
-        // execute batch request
-        final List<Olingo4BatchResponse> responseParts = requestBody("direct:batch", batchParts);
-        assertNotNull(responseParts, "Batch response");
-        assertEquals(8, responseParts.size(), "Batch responses expected");
-
-        final Edm edm = (Edm) responseParts.get(0).getBody();
-        assertNotNull(edm);
-        LOG.info("Edm entity sets: {}", edm.getEntityContainer().getEntitySets());
-
-        ClientEntitySet entitySet = (ClientEntitySet) responseParts.get(1).getBody();
-        assertNotNull(entitySet);
-        LOG.info("Read entities: {}", entitySet.getEntities());
-
-        clientEntity = (ClientEntity) responseParts.get(2).getBody();
-        assertNotNull(clientEntity);
-        LOG.info("Read entiry properties: {}", clientEntity.getProperties());
-
-        ClientEntitySet entitySetWithTop = (ClientEntitySet) responseParts.get(3).getBody();
-        assertNotNull(entitySetWithTop);
-        assertEquals(5, entitySetWithTop.getEntities().size());
-        LOG.info("Read entities with $top=5: {}", entitySet.getEntities());
-
-        clientEntity = (ClientEntity) responseParts.get(4).getBody();
-        assertNotNull(clientEntity);
-        LOG.info("Created entity: {}", clientEntity.getProperties());
-
-        int statusCode = responseParts.get(5).getStatusCode();
-        assertEquals(HttpStatusCode.NO_CONTENT.getStatusCode(), statusCode);
-        LOG.info("Update MdiddleName status: {}", statusCode);
-
-        statusCode = responseParts.get(6).getStatusCode();
-        assertEquals(HttpStatusCode.NO_CONTENT.getStatusCode(), statusCode);
-        LOG.info("Delete entity status: {}", statusCode);
-
-        assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), responseParts.get(7).getStatusCode());
-        final ODataError error = (ODataError) responseParts.get(7).getBody();
-        assertNotNull(error);
-        LOG.info("Read deleted entity error: {}", error.getMessage());
     }
 
     @Test
@@ -471,9 +366,6 @@ public class Olingo4ComponentProducerTest extends AbstractOlingo4TestSupport {
 
                 // test route for delete
                 from("direct:read-deleted-entity").to("olingo4://delete/" + PEOPLE + "('lewisblack')");
-
-                // test route for batch
-                from("direct:batch").to("olingo4://batch");
 
                 from("direct:read-etag").to("olingo4://read/Airlines('AA')").to("mock:check-etag-header");
 

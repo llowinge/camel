@@ -16,6 +16,7 @@
  */
 package org.apache.camel.component.olingo4;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.camel.CamelContext;
@@ -30,6 +31,7 @@ import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.domain.ClientProperty;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -40,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class Olingo4ComponentConsumerTest extends AbstractOlingo4TestSupport {
+public class Olingo4ComponentConsumerTest extends AbstractOlingo4WireMockTestSupport {
 
     private static final String PEOPLE = "People";
     private static final String TEST_PEOPLE = "People('russellwhyte')";
@@ -53,6 +55,11 @@ public class Olingo4ComponentConsumerTest extends AbstractOlingo4TestSupport {
     private void addRouteAndStartContext(RouteBuilder builder) throws Exception {
         context().addRoutes(builder);
         startCamelContext();
+    }
+
+    @BeforeAll
+    public static void setSessionId() throws IOException {
+        refreshSession();
     }
 
     @Override
