@@ -20,23 +20,35 @@ import java.io.IOException;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.recording.RecordingStatus;
+import org.apache.camel.CamelContext;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
+import org.apache.camel.test.infra.core.annotations.ContextFixture;
+import org.apache.camel.test.junit5.ConfigurableContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
-public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4TestSupport {
+public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4TestSupport implements ConfigurableContext {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOlingo4WireMockTestSupport.class);
     protected static WireMockServer wireMockServer;
     protected static String serverUrlWithSessionId;
     protected static String sessionId;
     private TestInfo testInfo;
+    @RegisterExtension
+    public static final CamelContextExtension contextExtension = new DefaultCamelContextExtension();
+
+    //public AbstractOlingo4WireMockTestSupport() {
+    //    testConfiguration().withAutoStartContext(false);
+    //}
 
     @BeforeAll
     public static void startWireMockServer() {
@@ -81,9 +93,38 @@ public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4
     }
 
     @BeforeEach
-    void setup(TestInfo testInfo) {
+    public void beforeEach(TestInfo testInfo) throws IOException {
         this.testInfo = testInfo;
+        // make use of the test method name to avoid collision
+        String prefix = testInfo.getDisplayName().toLowerCase() + "-";
+        CamelContext context = contextExtension.getContext();
+        Olingo4Component component = context.getComponent("olingo4", Olingo4Component.class);
+        String resolved = getResolvedTestServiceBaseUrl();
+        LOG.info("Ress" + resolved);
+        component.setConfiguration(new Olingo4Configuration());
+        component.getConfiguration().setServiceUri(resolved);
+        // clean solr endpoints
+        //executeDeleteAll();
+        //solrEndpoint = context.getEndpoint(DEFAULT_SOLR_ENDPOINT, SolrEndpoint.class);
+        //solrEndpoint.getConfiguration().setRequestHandler(null);
+        //template.setDefaultEndpoint(solrEndpoint);
     }
+
+    @ContextFixture
+    public void configureContext(CamelContext camelContext) {
+        System.out.println("Configuring camelContext");
+
+    }
+
+    //@BeforeEach
+    //void setup(TestInfo testInfo) throws IOException {
+    //    System.out.println("Starting " + testInfo);
+    //    this.testInfo = testInfo;
+    //    Olingo4Component component = (Olingo4Component) context.getComponent("olingo4");
+    //    String resolved = getResolvedTestServiceBaseUrl();
+    //    System.out.println("Resolved v setup:" + resolved);
+    //    component.getConfiguration().setServiceUri(resolved);
+    //}
 
     @Override
     public String getResolvedTestServiceBaseUrl() throws IOException {

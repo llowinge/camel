@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.tomakehurst.wiremock.recording.RecordingStatus;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -46,15 +44,15 @@ public class Olingo4RouteTest extends AbstractOlingo4WireMockTestSupport {
         refreshSession();
     }
 
-    @AfterAll
-    public static void stopWireMockServer() {
-        if (useMockedBackend()) {
-            if (wireMockServer.getRecordingStatus().getStatus().equals(RecordingStatus.Recording)) {
-                wireMockServer.stopRecording();
-            }
-            wireMockServer.stop();
-        }
-    }
+    //@AfterAll
+    //public static void stopWireMockServer() {
+    //    if (useMockedBackend()) {
+    //        if (wireMockServer.getRecordingStatus().getStatus().equals(RecordingStatus.Recording)) {
+    //            wireMockServer.stopRecording();
+    //        }
+    //        wireMockServer.stop();
+    //    }
+    //}
 
     @Test
     public void testRead() {

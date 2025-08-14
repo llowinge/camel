@@ -54,13 +54,10 @@ public class AbstractOlingo4TestSupport extends CamelTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         final CamelContext context = super.createCamelContext();
-
         final Olingo4Configuration configuration = new Olingo4Configuration();
-        String resolvedTestServiceBaseUrl = getResolvedTestServiceBaseUrl();
-        LOG.info("Resolved test service baseurl: {}", resolvedTestServiceBaseUrl);
-        configuration.setServiceUri(resolvedTestServiceBaseUrl);
+        configuration.setServiceUri("http://abcd");
         configuration.setContentType("application/json;charset=utf-8");
-
+        System.out.println("Vytvoren camel context");
         // add OlingoComponent to Camel context
         final Olingo4Component component = new Olingo4Component(context);
         component.setConfiguration(configuration);
