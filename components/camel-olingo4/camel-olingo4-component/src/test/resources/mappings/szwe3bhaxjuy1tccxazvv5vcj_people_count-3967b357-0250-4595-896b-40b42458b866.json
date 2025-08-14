@@ -1,0 +1,26 @@
+{
+  "id" : "3967b357-0250-4595-896b-40b42458b866",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_people_count",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/People/$count",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "20",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:45 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "text/plain; charset=utf-8"
+    }
+  },
+  "uuid" : "3967b357-0250-4595-896b-40b42458b866",
+  "persistent" : true,
+  "insertionIndex" : 39
+}

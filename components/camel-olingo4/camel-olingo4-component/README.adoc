@@ -1,0 +1,5 @@
+== Camel Olingo4 integration tests
+
+Connection to `https://services.odata.org/TripPinRESTierService` has to be enabled by providing system property `use.real.backend` with value `true`. If not provided mocked test (using WireMock is used).
+
+Note: `Olingo4ComponentProducerBatchTest#testBatch` is run against real server, because it is not possible to mock it with WireMock (please see https://github.com/wiremock/wiremock/issues/3133).

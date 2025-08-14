@@ -1,0 +1,28 @@
+{
+  "id" : "50e3fa0c-3ba6-460e-b709-a273e0a4f25c",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_airportsksfo",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/Airports('KSFO')",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@odata.context\":\"https://services.odata.org/TripPinRESTierService/(S(zwe3bhaxjuy1tccxazvv5vcj))/$metadata#Airports/$entity\",\"Name\":\"San Francisco International Airport\",\"IcaoCode\":\"KSFO\",\"IataCode\":\"SFO\",\"Location\":{\"Address\":\"South McDonnell Road, San Francisco, CA 94128\",\"Loc\":{\"type\":\"Point\",\"coordinates\":[-122.374722222222,37.6188888888889],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}},\"City\":{\"Name\":\"San Francisco\",\"CountryRegion\":\"United States\",\"Region\":\"California\"}}}",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:17 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "application/json; charset=utf-8; odata.metadata=minimal"
+    }
+  },
+  "uuid" : "50e3fa0c-3ba6-460e-b709-a273e0a4f25c",
+  "persistent" : true,
+  "scenarioName" : "scenario-7-(S(zwe3bhaxjuy1tccxazvv5vcj))-Airports('KSFO')",
+  "requiredScenarioState" : "scenario-7-(S(zwe3bhaxjuy1tccxazvv5vcj))-Airports('KSFO')-5",
+  "insertionIndex" : 65
+}

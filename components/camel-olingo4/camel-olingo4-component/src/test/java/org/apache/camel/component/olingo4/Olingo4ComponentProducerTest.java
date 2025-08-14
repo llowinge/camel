@@ -37,7 +37,9 @@ import org.apache.olingo.client.api.domain.ClientServiceDocument;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Test class for {@link org.apache.camel.component.olingo4.api.Olingo4App} APIs.
  */
+@TestMethodOrder(MethodOrderer.Random.class)
 public class Olingo4ComponentProducerTest extends AbstractOlingo4WireMockTestSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(Olingo4ComponentProducerTest.class);

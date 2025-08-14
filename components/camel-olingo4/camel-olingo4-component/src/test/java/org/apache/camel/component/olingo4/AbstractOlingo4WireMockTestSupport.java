@@ -19,14 +19,11 @@ package org.apache.camel.component.olingo4;
 import java.io.IOException;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.recording.RecordingStatus;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4TestSupport {
@@ -38,13 +35,13 @@ public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4
 
     @BeforeAll
     public static void startWireMockServer() {
-        if (useMockedBackend() && wireMockServer == null) {
+        if (useMockedBackend()) {
             LOG.info("Starting WireMock server");
             wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
             wireMockServer.start();
-            wireMockServer.startRecording(recordSpec()
-                    .forTarget(ODATA_API_BASE_URL)
-                    .allowNonProxied(false));
+            //wireMockServer.startRecording(recordSpec()
+            //        .forTarget(ODATA_API_BASE_URL)
+            //        .allowNonProxied(false));
             // TODO: Enable when https://github.com/wiremock/wiremock/issues/3133 is fixed
             //wireMockServer.stubFor(post(urlPathMatching(".*\\/\\$batch"))
             //        .withHeader("Content-Type", matching("multipart/mixed;boundary=.*"))
@@ -60,12 +57,12 @@ public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4
 
     @AfterAll
     public static void stopWireMockServer() {
-        if (useMockedBackend()) {
-            if (wireMockServer.getRecordingStatus().getStatus().equals(RecordingStatus.Recording)) {
-                wireMockServer.stopRecording();
-            }
-            wireMockServer.stop();
-        }
+        //if (useMockedBackend()) {
+        //    if (wireMockServer.getRecordingStatus().getStatus().equals(RecordingStatus.Recording)) {
+        //        wireMockServer.stopRecording();
+        //    }
+        //    wireMockServer.stop();
+        //}
     }
 
     protected static boolean useMockedBackend() {

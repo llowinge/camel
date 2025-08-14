@@ -1,0 +1,26 @@
+{
+  "id" : "68e97bbf-0f87-495d-aa7c-ad5edcaf9887",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_airportsksfo_location",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/Airports('KSFO')/Location",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@odata.context\":\"https://services.odata.org/TripPinRESTierService/(S(zwe3bhaxjuy1tccxazvv5vcj))/$metadata#Airports('KSFO')/Location\",\"Address\":\"South McDonnell Road, San Francisco, CA 94128\",\"Loc\":{\"type\":\"Point\",\"coordinates\":[-122.374722222222,37.6188888888889],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}},\"City\":{\"Name\":\"San Francisco\",\"CountryRegion\":\"United States\",\"Region\":\"California\"}}",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:47 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "application/json; charset=utf-8; odata.metadata=minimal"
+    }
+  },
+  "uuid" : "68e97bbf-0f87-495d-aa7c-ad5edcaf9887",
+  "persistent" : true,
+  "insertionIndex" : 36
+}

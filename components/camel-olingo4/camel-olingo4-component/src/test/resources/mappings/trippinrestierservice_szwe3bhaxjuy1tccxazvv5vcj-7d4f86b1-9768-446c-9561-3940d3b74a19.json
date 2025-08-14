@@ -1,0 +1,23 @@
+{
+  "id" : "7d4f86b1-9768-446c-9561-3940d3b74a19",
+  "name" : "trippinrestierservice_szwe3bhaxjuy1tccxazvv5vcj",
+  "request" : {
+    "url" : "/TripPinRESTierService/(S(zwe3bhaxjuy1tccxazvv5vcj))/",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 500,
+    "body" : "The page cannot be displayed because an internal server error has occurred.",
+    "headers" : {
+      "Cache-Control" : "private",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "Date" : "Wed, 13 Aug 2025 14:42:55 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "text/html"
+    }
+  },
+  "uuid" : "7d4f86b1-9768-446c-9561-3940d3b74a19",
+  "persistent" : true,
+  "insertionIndex" : 74
+}

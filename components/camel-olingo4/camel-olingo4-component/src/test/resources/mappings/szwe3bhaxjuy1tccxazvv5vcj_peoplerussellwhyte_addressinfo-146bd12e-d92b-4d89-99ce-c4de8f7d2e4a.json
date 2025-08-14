@@ -1,0 +1,29 @@
+{
+  "id" : "146bd12e-d92b-4d89-99ce-c4de8f7d2e4a",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_peoplerussellwhyte_addressinfo",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/People('russellwhyte')/AddressInfo",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@odata.context\":\"https://services.odata.org/TripPinRESTierService/(S(zwe3bhaxjuy1tccxazvv5vcj))/$metadata#People('russellwhyte')/AddressInfo\",\"value\":[{\"Address\":\"187 Suffolk Ln.\",\"City\":{\"Name\":\"Boise\",\"CountryRegion\":\"United States\",\"Region\":\"ID\"}}]}",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:34 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "application/json; charset=utf-8; odata.metadata=minimal"
+    }
+  },
+  "uuid" : "146bd12e-d92b-4d89-99ce-c4de8f7d2e4a",
+  "persistent" : true,
+  "scenarioName" : "scenario-6-(S(zwe3bhaxjuy1tccxazvv5vcj))-People('russellwhyte')-AddressInfo",
+  "requiredScenarioState" : "Started",
+  "newScenarioState" : "scenario-6-(S(zwe3bhaxjuy1tccxazvv5vcj))-People('russellwhyte')-AddressInfo-2",
+  "insertionIndex" : 51
+}
