@@ -1,0 +1,26 @@
+{
+  "id" : "9a980fb9-998f-4e05-90cf-18f5472ca61c",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_airportsksfo_name",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/Airports('KSFO')/Name",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@odata.context\":\"https://services.odata.org/TripPinRESTierService/(S(zwe3bhaxjuy1tccxazvv5vcj))/$metadata#Airports('KSFO')/Name\",\"value\":\"San Francisco International Airport\"}",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:46 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "application/json; charset=utf-8; odata.metadata=minimal"
+    }
+  },
+  "uuid" : "9a980fb9-998f-4e05-90cf-18f5472ca61c",
+  "persistent" : true,
+  "insertionIndex" : 37
+}

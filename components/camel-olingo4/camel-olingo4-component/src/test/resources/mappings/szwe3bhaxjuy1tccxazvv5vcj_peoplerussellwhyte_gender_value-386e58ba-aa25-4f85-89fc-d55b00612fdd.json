@@ -1,0 +1,26 @@
+{
+  "id" : "386e58ba-aa25-4f85-89fc-d55b00612fdd",
+  "name" : "szwe3bhaxjuy1tccxazvv5vcj_peoplerussellwhyte_gender_value",
+  "request" : {
+    "url" : "/(S(zwe3bhaxjuy1tccxazvv5vcj))/People('russellwhyte')/Gender/$value",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "Male",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "Server" : "Microsoft-IIS/10.0",
+      "X-AspNet-Version" : "4.0.30319",
+      "OData-Version" : "4.0",
+      "Pragma" : "no-cache",
+      "Expires" : "-1",
+      "Date" : "Wed, 13 Aug 2025 14:43:46 GMT",
+      "X-Powered-By" : "ASP.NET",
+      "Content-Type" : "text/plain; charset=utf-8"
+    }
+  },
+  "uuid" : "386e58ba-aa25-4f85-89fc-d55b00612fdd",
+  "persistent" : true,
+  "insertionIndex" : 38
+}

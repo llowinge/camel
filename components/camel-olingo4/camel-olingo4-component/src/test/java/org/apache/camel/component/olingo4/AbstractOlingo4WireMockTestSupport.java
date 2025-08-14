@@ -20,9 +20,10 @@ import java.io.IOException;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.recording.RecordingStatus;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +36,11 @@ public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4
     protected static WireMockServer wireMockServer;
     protected static String serverUrlWithSessionId;
     protected static String sessionId;
+    private TestInfo testInfo;
 
     @BeforeAll
     public static void startWireMockServer() {
-        if (useMockedBackend() && wireMockServer == null) {
+        if (useMockedBackend()) {
             LOG.info("Starting WireMock server");
             wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
             wireMockServer.start();
@@ -72,21 +74,27 @@ public abstract class AbstractOlingo4WireMockTestSupport extends AbstractOlingo4
         return !Boolean.TRUE.toString().equals(System.getProperty("use.real.backend"));
     }
 
-    @Override
-    public String getResolvedTestServiceBaseUrl() throws IOException {
-        if (useMockedBackend()) {
-            if (serverUrlWithSessionId == null) {
-                serverUrlWithSessionId = getRealServiceUrl("http://localhost:" + wireMockServer.port());
-            }
-            return serverUrlWithSessionId;
-        }
-        return super.getResolvedTestServiceBaseUrl();
-    }
-
     protected static void refreshSession() throws IOException {
         //if (useMockedBackend()) {
         //    serverUrlWithSessionId = computeRealServiceUrl("http://localhost:" + wireMockServer.port());
         //}
+    }
+
+    @BeforeEach
+    void setup(TestInfo testInfo) {
+        this.testInfo = testInfo;
+    }
+
+    @Override
+    public String getResolvedTestServiceBaseUrl() throws IOException {
+        if (useMockedBackend()) {
+            //if (serverUrlWithSessionId == null) {
+            serverUrlWithSessionId = getRealServiceUrl("http://localhost:" + wireMockServer.port(),
+                    testInfo.getTestClass().get().getSimpleName() + "_" + testInfo.getTestMethod().get().getName());
+            //}
+            return serverUrlWithSessionId;
+        }
+        return super.getResolvedTestServiceBaseUrl();
     }
 
     @Override

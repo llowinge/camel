@@ -94,7 +94,7 @@ public class AbstractOlingo4TestSupport extends CamelTestSupport {
     }
 
     public String getResolvedTestServiceBaseUrl() throws IOException {
-        return getRealServiceUrl(ODATA_API_BASE_URL);
+        return getRealServiceUrl(ODATA_API_BASE_URL, "doesnt_matter_here");
     }
 
     /*
@@ -105,9 +105,10 @@ public class AbstractOlingo4TestSupport extends CamelTestSupport {
      * generated postfix
      */
     @SuppressWarnings("deprecation")
-    protected String getRealServiceUrl(String baseUrl) throws IOException {
+    protected String getRealServiceUrl(String baseUrl, String headerValue) throws IOException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(baseUrl);
+        httpGet.addHeader("WireMockScenario", headerValue);
         HttpContext httpContext = new BasicHttpContext();
         httpclient.execute(httpGet, httpContext);
         HttpUriRequest currentReq = (HttpUriRequest) httpContext.getAttribute(ExecutionContext.HTTP_REQUEST);

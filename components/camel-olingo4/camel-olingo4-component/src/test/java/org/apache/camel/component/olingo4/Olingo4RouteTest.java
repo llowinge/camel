@@ -26,11 +26,14 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@TestMethodOrder(MethodOrderer.Random.class)
 public class Olingo4RouteTest extends AbstractOlingo4WireMockTestSupport {
 
     @SuppressWarnings("unchecked")
