@@ -2481,6 +2481,7 @@ public abstract class BaseMainSupport extends BaseService {
         }
         // load properties from JVM (override existing)
         if (mainConfigurationProperties.isAutoConfigurationSystemPropertiesEnabled()) {
+            System.out.println("Nacitam z System JVM");
             Properties propJVM = MainHelper.loadJvmSystemPropertiesAsProperties(
                     new String[] { "camel.component.", "camel.dataformat.", "camel.language." });
             if (!propJVM.isEmpty()) {

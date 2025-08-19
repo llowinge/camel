@@ -517,6 +517,15 @@ public class MainConfigurationProperties extends DefaultConfigurationProperties<
      * This option is default enabled.
      */
     public void setAutoConfigurationSystemPropertiesEnabled(boolean autoConfigurationSystemPropertiesEnabled) {
+        //try {
+        //    Thread.sleep(5000);
+        //} catch (InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+        System.out.println("Nastavuju hodnotu " + autoConfigurationSystemPropertiesEnabled);
+        //for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+        //    System.out.println(ste + "\n");
+        //}
         this.autoConfigurationSystemPropertiesEnabled = autoConfigurationSystemPropertiesEnabled;
     }
 
