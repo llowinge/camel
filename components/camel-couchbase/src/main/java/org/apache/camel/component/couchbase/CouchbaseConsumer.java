@@ -137,7 +137,8 @@ public class CouchbaseConsumer extends ScheduledBatchPollingConsumer implements 
                 Object doc;
                 String id = row.id().get();
                 if (endpoint.isFullDocument()) {
-                    doc = CouchbaseCollectionOperation.getDocument(collection, id, endpoint.getQueryTimeout());
+                    doc = CouchbaseCollectionOperation.getDocument(collection, id, endpoint.getQueryTimeout(),
+                            endpoint.getProducerRetryPause());
                 } else {
                     doc = row.valueAs(Object.class);
                 }
