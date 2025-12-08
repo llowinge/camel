@@ -294,6 +294,8 @@ public class SecretsManagerProducer extends DefaultProducer {
                         = exchange.getIn().getHeader(SecretsManagerConstants.LAMBDA_ROTATION_FUNCTION_ARN, String.class);
                 builder.rotationLambdaARN(lambdaRotationArn);
             }
+            System.out.println("Nastavuju request");
+            builder.rotationRules(RotationRulesType.builder().build());
             request = builder.build();
         }
         try {
