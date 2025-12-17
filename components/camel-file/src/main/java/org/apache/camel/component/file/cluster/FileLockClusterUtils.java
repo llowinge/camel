@@ -25,11 +25,23 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+
+import org.apache.camel.util.function.ThrowingHelper;
+import org.apache.camel.util.function.ThrowingSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Miscellaneous utility methods for managing the file lock cluster state.
  */
 final class FileLockClusterUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileLockClusterUtils.class);
+
     /**
      * Length of byte[] obtained from java.util.UUID.
      */
@@ -62,33 +74,41 @@ final class FileLockClusterUtils {
             FileChannel channel,
             FileLockClusterLeaderInfo clusterLeaderInfo,
             boolean forceMetaData)
-            throws IOException {
+            throws Exception {
 
         Objects.requireNonNull(channel, "channel cannot be null");
         Objects.requireNonNull(clusterLeaderInfo, "clusterLeaderInfo cannot be null");
 
-        if (!Files.exists(leaderDataPath)) {
-            throw new FileNotFoundException("Cluster leader data file " + leaderDataPath + " not found");
-        }
+        Supplier<Void> task = ThrowingHelper.wrapAsSupplier(new ThrowingSupplier<Void, Throwable>() {
+            @Override
+            public Void get() throws Throwable {
+                if (!Files.exists(leaderDataPath)) {
+                    throw new FileNotFoundException("Cluster leader data file " + leaderDataPath + " not found");
+                }
 
-        String uuidStr = clusterLeaderInfo.getId();
-        byte[] uuidBytes = uuidStr.getBytes(StandardCharsets.UTF_8);
+                String uuidStr = clusterLeaderInfo.getId();
+                byte[] uuidBytes = uuidStr.getBytes(StandardCharsets.UTF_8);
 
-        ByteBuffer buf = ByteBuffer.allocate(LOCKFILE_BUFFER_SIZE);
-        buf.put(uuidBytes);
-        buf.putLong(clusterLeaderInfo.getHeartbeatUpdateIntervalMilliseconds());
-        buf.putLong(clusterLeaderInfo.getHeartbeatMilliseconds());
-        buf.flip();
+                ByteBuffer buf = ByteBuffer.allocate(LOCKFILE_BUFFER_SIZE);
+                buf.put(uuidBytes);
+                buf.putLong(clusterLeaderInfo.getHeartbeatUpdateIntervalMilliseconds());
+                buf.putLong(clusterLeaderInfo.getHeartbeatMilliseconds());
+                buf.flip();
 
-        if (forceMetaData) {
-            channel.truncate(0);
-        }
+                if (forceMetaData) {
+                    channel.truncate(0);
+                }
 
-        channel.position(0);
-        while (buf.hasRemaining()) {
-            channel.write(buf);
-        }
-        channel.force(forceMetaData);
+                channel.position(0);
+                while (buf.hasRemaining()) {
+                    channel.write(buf);
+                }
+                channel.force(forceMetaData);
+                return null;
+            }
+        });
+
+        runClusterLeaderInfoTask(task);
     }
 
     /**
@@ -100,29 +120,37 @@ final class FileLockClusterUtils {
      *                        inconsistent state
      * @throws IOException    If reading the lock file failed
      */
-    static FileLockClusterLeaderInfo readClusterLeaderInfo(Path leaderDataPath) throws IOException {
-        try {
-            byte[] bytes = Files.readAllBytes(leaderDataPath);
+    static FileLockClusterLeaderInfo readClusterLeaderInfo(Path leaderDataPath) throws Exception {
+        Supplier<FileLockClusterLeaderInfo> task
+                = ThrowingHelper.wrapAsSupplier(new ThrowingSupplier<FileLockClusterLeaderInfo, Throwable>() {
+                    @Override
+                    public FileLockClusterLeaderInfo get() throws Throwable {
+                        try {
+                            byte[] bytes = Files.readAllBytes(leaderDataPath);
 
-            if (bytes.length < LOCKFILE_BUFFER_SIZE) {
-                // Data is incomplete or in a transient / corrupt state
-                return null;
-            }
+                            if (bytes.length < LOCKFILE_BUFFER_SIZE) {
+                                // Data is incomplete or in a transient / corrupt state
+                                return null;
+                            }
 
-            // Parse the cluster leader data
-            ByteBuffer buf = ByteBuffer.wrap(bytes);
-            byte[] uuidBytes = new byte[UUID_BYTE_LENGTH];
-            buf.get(uuidBytes);
+                            // Parse the cluster leader data
+                            ByteBuffer buf = ByteBuffer.wrap(bytes);
+                            byte[] uuidBytes = new byte[UUID_BYTE_LENGTH];
+                            buf.get(uuidBytes);
 
-            String uuidStr = new String(uuidBytes, StandardCharsets.UTF_8);
-            long intervalMillis = buf.getLong();
-            long lastHeartbeat = buf.getLong();
+                            String uuidStr = new String(uuidBytes, StandardCharsets.UTF_8);
+                            long intervalMillis = buf.getLong();
+                            long lastHeartbeat = buf.getLong();
 
-            return new FileLockClusterLeaderInfo(uuidStr, intervalMillis, lastHeartbeat);
-        } catch (NoSuchFileException e) {
-            // Handle NoSuchFileException to give the ClusterView a chance to recreate the leadership data
-            return null;
-        }
+                            return new FileLockClusterLeaderInfo(uuidStr, intervalMillis, lastHeartbeat);
+                        } catch (FileNotFoundException | NoSuchFileException e) {
+                            // Handle NoSuchFileException to give the ClusterView a chance to recreate the leadership data
+                            return null;
+                        }
+                    }
+                });
+
+        return runClusterLeaderInfoTask(task);
     }
 
     /**
@@ -171,5 +199,38 @@ final class FileLockClusterUtils {
         final long heartbeatUpdateIntervalMilliseconds = latestClusterLeaderInfo.getHeartbeatUpdateIntervalMilliseconds();
         final long timeout = heartbeatUpdateIntervalMilliseconds * (long) heartbeatTimeoutMultiplier;
         return elapsed > timeout;
+    }
+
+    /**
+     * If the cluster data root is network based, like an NFS mount, avoid potential long blocking I/O to fail fast and
+     * reliably reason about the cluster state.
+     *
+     * @param  task Supplier representing a task to run
+     * @return      The result of the task
+     */
+    static <T> T runClusterLeaderInfoTask(Supplier<T> task) throws ExecutionException, TimeoutException {
+        int maxRetries = 6;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            LOGGER.debug("Running cluster leader info task attempt {} of {}", attempt, maxRetries);
+
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(task);
+            try {
+                return future.get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.trace("Cluster leader info task interrupted on attempt {} of {}", attempt, maxRetries);
+                Thread.currentThread().interrupt();
+                return null;
+            } catch (ExecutionException | TimeoutException e) {
+                LOGGER.debug("Cluster leader info task encountered an exception on attempt {} of {}", attempt, maxRetries, e);
+                if (attempt == maxRetries) {
+                    LOGGER.debug("Cluster leader info task retry limit ({}) reached", maxRetries, e);
+                    throw e;
+                }
+            } finally {
+                LOGGER.debug("Cluster leader info task attempt {} ended", attempt);
+            }
+        }
+        return null;
     }
 }

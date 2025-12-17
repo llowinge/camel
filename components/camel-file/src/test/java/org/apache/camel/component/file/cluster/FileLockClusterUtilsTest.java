@@ -16,13 +16,12 @@
  */
 package org.apache.camel.component.file.cluster;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -161,7 +160,7 @@ class FileLockClusterUtilsTest {
 
     @Test
     void writeClusterLeaderInfoClusterDataFileNotFound(@TempDir Path tempDir) {
-        assertThrows(FileNotFoundException.class, () -> {
+        ExecutionException exception = assertThrows(ExecutionException.class, () -> {
             try (RandomAccessFile raf = new RandomAccessFile(tempDir.resolve("leader.dat").toFile(), "rw")) {
                 FileLockClusterLeaderInfo leaderInfo = new FileLockClusterLeaderInfo(UUID.randomUUID().toString(), 1L, 1L);
                 FileLockClusterUtils.writeClusterLeaderInfo(Paths.get("/invalid/data/file"), raf.getChannel(), leaderInfo,
@@ -171,7 +170,7 @@ class FileLockClusterUtilsTest {
     }
 
     @Test
-    void writeClusterLeaderInfoData(@TempDir Path tempDir) throws IOException {
+    void writeClusterLeaderInfoData(@TempDir Path tempDir) throws Exception {
         Path clusterData = tempDir.resolve("leader.dat");
         try (RandomAccessFile raf = new RandomAccessFile(clusterData.toFile(), "rw")) {
             FileLockClusterLeaderInfo leaderInfo = new FileLockClusterLeaderInfo(UUID.randomUUID().toString(), 1L, 2L);
